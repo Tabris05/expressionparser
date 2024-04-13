@@ -14,23 +14,44 @@ struct overload : Fs... {
 	using Fs::operator()...;
 };
 
+bool isoperator(char c) {
+	return (c == '+')
+		|| (c == '-')
+		|| (c == '*')
+		|| (c == '/');
+}
+
+bool isnumber(char c) {
+	return (c == '.') || isdigit(c);
+}
+
 optional<vector<Token>> tokenize(const string& line) {
 	vector<Token> result;
+	string number;
+
+	bool parsingNumber = false;
 
 	for (char c : line) {
-		switch (c) {
-			case ' ':
-				continue;
-			case '+':
-			case '-':
-			case '*':
-			case '/':
-				result.push_back(c);
-				break;
-			default:
-				return nullopt;
+		if (isnumber(c)) {
+			parsingNumber = true;
+			number.push_back(c);
+			continue;
+		}
+		else if (parsingNumber) {
+			result.push_back(stod(number));
+			parsingNumber = false;
+			number.clear();
 		}
 
+		if (isspace(c)) {
+			continue;
+		}
+		else if (isoperator(c)) {
+			result.push_back(c);
+		}
+		else {
+			return nullopt;
+		}
 	}
 
 	return result;
@@ -55,7 +76,7 @@ string to_string(const vector<Token>& tokens) {
 int main() {
 	string line;
 	while (getline(cin, line)) {
-		optional<vector<Token>> tokens = tokenize(line);
+		optional<vector<Token>> tokens = tokenize(line + "\n");
 		if (!tokens) {
 			println("Syntax error!");
 			continue;
