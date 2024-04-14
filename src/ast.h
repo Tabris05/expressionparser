@@ -34,12 +34,15 @@ Result<AST> make_ast(queue<Token>& tokens, size_t prevPrecedence) {
 	if (holds_alternative<Operator>(tokens.front())) {
 		return unexpected("Binary operator requires two arguments");
 	}
+	if (holds_alternative<RParen>(tokens.front())) {
+		return unexpected("Mismatched parentheses");
+	}
 
 	Result<AST> result;
 	if (holds_alternative<LParen>(tokens.front())) {
 		tokens.pop();
 		result = make_ast(tokens);
-		if (!holds_alternative<RParen>(tokens.front())) {
+		if (tokens.empty() || !holds_alternative<RParen>(tokens.front())) {
 			return unexpected("Mismatched parentheses");
 		}
 		tokens.pop();
