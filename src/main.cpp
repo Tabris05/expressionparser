@@ -24,7 +24,7 @@ int main() {
 			continue;
 		}
 
-		vector<Token> expression = traverse(move(expressionTree.value()));
+		vector<ExpressionToken> expression = traverse(move(expressionTree.value()));
 		Result<Number> result = evaluate(expression);
 		if (result) println("{}", result.value());
 		else println("Logic Error: {}", result.error());

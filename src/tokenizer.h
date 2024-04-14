@@ -40,6 +40,22 @@ optional<Operator> tryParseOperator(string_view line, size_t& idx) {
 	}
 }
 
+optional<LParen> tryParseLParen(string_view line, size_t& idx) {
+	if (line[idx] == '(') {
+		idx++;
+		return LParen{};
+	}
+	return nullopt;
+}
+
+optional<RParen> tryParseRParen(string_view line, size_t& idx) {
+	if (line[idx] == ')') {
+		idx++;
+		return RParen{};
+	}
+	return nullopt;
+}
+
 Result<queue<Token>> tokenize(string_view line) {
 	queue<Token> result;
 	size_t idx = 0;
@@ -56,6 +72,18 @@ Result<queue<Token>> tokenize(string_view line) {
 		optional<Operator> maybeOp = tryParseOperator(line, idx);
 		if (maybeOp) {
 			result.push(maybeOp.value());
+			continue;
+		}
+
+		optional<LParen> maybeLParen = tryParseLParen(line, idx);
+		if (maybeLParen) {
+			result.push(maybeLParen.value());
+			continue;
+		}
+
+		optional<RParen> maybeRParen = tryParseRParen(line, idx);
+		if (maybeRParen) {
+			result.push(maybeRParen.value());
 			continue;
 		}
 

@@ -8,9 +8,13 @@
 
 using namespace std;
 
+struct LParen {};
+struct RParen {};
+
 using Number = double;
 using Operator = char;
-using Token = variant<Number, Operator>;
+using Token = variant<Number, Operator, LParen, RParen>;
+using ExpressionToken = variant<Number, Operator>;
 
 template<typename T>
 using Result = expected<T, string>;
@@ -21,7 +25,7 @@ struct overload : Fs... {
 };
 
 struct Node {
-	Token val;
+	ExpressionToken val;
 	unique_ptr<Node> lhs;
 	unique_ptr<Node> rhs;
 };

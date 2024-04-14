@@ -26,17 +26,28 @@ Result<AST> make_ast_helper(AST left, queue<Token>& tokens, size_t prevPrecedenc
 	Result<AST> right = make_ast(tokens, prevPrecedence);
 	if (!right) return right;
 	
-	unique_ptr<Node> result = make_unique<Node>(cur, move(left), move(right.value()));
+	unique_ptr<Node> result = make_unique<Node>(get<Operator>(cur), move(left), move(right.value()));
 	return result;
 }
 
 Result<AST> make_ast(queue<Token>& tokens, size_t prevPrecedence) {
-	if (tokens.size() == 0 || !holds_alternative<Number>(tokens.front())) {
+	if (holds_alternative<Operator>(tokens.front())) {
 		return unexpected("Binary operator requires two arguments");
 	}
 
-	Result<AST> result = make_unique<Node>(tokens.front());
-	tokens.pop();
+	Result<AST> result;
+	if (holds_alternative<LParen>(tokens.front())) {
+		tokens.pop();
+		result = make_ast(tokens);
+		if (!holds_alternative<RParen>(tokens.front())) {
+			return unexpected("Mismatched parentheses");
+		}
+		tokens.pop();
+	}
+	else {
+		result = make_unique<Node>(get<Number>(tokens.front()));
+		tokens.pop();
+	}
 
 	while (!tokens.empty()) {
 		if (!holds_alternative<Operator>(tokens.front())) break;

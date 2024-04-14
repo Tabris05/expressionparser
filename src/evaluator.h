@@ -6,8 +6,8 @@
 #include "defs.h"
 
 
-vector<Token> traverse(AST root) {
-	vector<Token> result;
+vector<ExpressionToken> traverse(AST root) {
+	vector<ExpressionToken> result;
 
 	[&result](this auto self, AST root) {
 		if (!root) return;
@@ -32,9 +32,9 @@ Number evaluate(Number lhs, Operator op, Number rhs) {
 	}
 }
 
-Number evaluate(const vector<Token>& expression) {
+Number evaluate(const vector<ExpressionToken>& expression) {
 	stack<Number> s;
-	for (Token t : expression) {
+	for (ExpressionToken t : expression) {
 		visit(
 			overload{
 				[&s](Number num) {
