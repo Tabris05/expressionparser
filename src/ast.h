@@ -31,13 +31,6 @@ Result<AST> make_ast_helper(AST left, queue<Token>& tokens, size_t prevPrecedenc
 }
 
 Result<AST> make_ast(queue<Token>& tokens, size_t prevPrecedence) {
-	if (holds_alternative<Operator>(tokens.front())) {
-		return unexpected("Binary operator requires two arguments");
-	}
-	if (holds_alternative<RParen>(tokens.front())) {
-		return unexpected("Mismatched parentheses");
-	}
-
 	Result<AST> result;
 	if (holds_alternative<LParen>(tokens.front())) {
 		tokens.pop();
@@ -47,10 +40,21 @@ Result<AST> make_ast(queue<Token>& tokens, size_t prevPrecedence) {
 		}
 		tokens.pop();
 	}
-	else {
+	else if (holds_alternative<Number>(tokens.front())) {
 		result = make_unique<Node>(get<Number>(tokens.front()));
 		tokens.pop();
 	}
+	else if (holds_alternative<Operator>(tokens.front())) {
+		if (get<Operator>(tokens.front()) != '-') return unexpected("Binary operator requires two arguments");
+		tokens.pop();
+		result = make_ast(tokens);
+		if (!result) return result;
+		result = make_unique<Node>('*', make_unique<Node>(-1.0), move(result.value()));
+	}
+	else if (holds_alternative<RParen>(tokens.front())) {
+		return unexpected("Mismatched parentheses");
+	}
+
 
 	while (!tokens.empty()) {
 		if (!holds_alternative<Operator>(tokens.front())) break;
